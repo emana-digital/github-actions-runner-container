@@ -82,12 +82,6 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 RUN curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
-###
-# Clear cache (reduce container image)
-###
-RUN rm -rf /var/lib/apt/lists/*; \
-    apt-get clean
-
 RUN useradd -ms /bin/bash runner; \
     usermod -aG docker runner; \
     usermod -aG sudo runner; \
@@ -106,5 +100,11 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+###
+# Clear cache (reduce container image)
+###
+RUN rm -rf /var/lib/apt/lists/*; \
+    apt-get clean
 
 USER runner
