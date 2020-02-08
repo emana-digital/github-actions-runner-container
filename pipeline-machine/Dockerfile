@@ -12,8 +12,7 @@ ENV RUNNER_REPOSITORY_URL=""
 # Disable scripts interactions
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Add php repository
-RUN apt-get update; \
+RUN apt-get update && apt-get upgrade -y; \
     apt-get install -y apt-utils;
 
 # Install common dependencies and php repository
@@ -37,6 +36,7 @@ RUN apt-get update; \
     php7.3-mysql \
     php7.3-zip \
     php7.3-fpm \
+    php7.3-dom \
     php7.3-curl;
 
 # Allow composer to execute scripts as super user to remove warnings
