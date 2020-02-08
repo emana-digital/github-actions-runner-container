@@ -14,15 +14,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Add php repository
 RUN apt-get update; \
-    apt-get install -y apt-utils
+    apt-get install -y apt-utils;
 
 # Install common dependencies and php repository
-RUN apt-get -y install software-properties-common unzip curl git sudo supervisor apt-transport-https lsb-release ca-certificates; \
-    add-apt-repository ppa:ondrej/php
+RUN apt-get -y install software-properties-common unzip curl git sudo supervisor apt-transport-https lsb-release ca-certificates;
 
 ###
 ## Start PHP config
 ###
+
+RUN add-apt-repository ppa:ondrej/php;
 
 # Install php and php extensions
 RUN apt-get update; \
@@ -87,6 +88,8 @@ RUN useradd -ms /bin/bash runner; \
     usermod -aG sudo runner; \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+WORKDIR /home/runner
+
 RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
     tar -zxf actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
     rm -f actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
@@ -100,11 +103,5 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
-###
-# Clear cache (reduce container image)
-###
-RUN rm -rf /var/lib/apt/lists/*; \
-    apt-get clean
 
 USER runner
