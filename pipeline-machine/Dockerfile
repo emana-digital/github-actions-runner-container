@@ -1,9 +1,14 @@
 # Ubuntu LTS
 FROM ubuntu:18.04
 
+# Github Actions Runner and Docker Composer Version
 ARG GH_RUNNER_VERSION="2.164.0"
 ARG DOCKER_COMPOSE_VERSION="1.24.1"
 
+# Php Version
+ARG PHP_VERSION="7.3"
+
+# Env variables
 ENV RUNNER_NAME=""
 ENV RUNNER_WORK_DIRECTORY="_work"
 ENV RUNNER_TOKEN=""
@@ -12,38 +17,46 @@ ENV RUNNER_REPOSITORY_URL=""
 # Disable scripts interactions
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get upgrade -y; \
+# update system
+RUN apt-get update -qy && apt-get upgrade -y; \
     apt-get install -y apt-utils;
 
-# Install common dependencies and php repository
-RUN apt-get -y install software-properties-common unzip curl git sudo supervisor apt-transport-https lsb-release ca-certificates;
+# Install common dependencies
+RUN apt-get install software-properties-common apt-transport-https ca-certificates unzip curl sudo supervisor lsb-release;
 
-###
-## Start PHP config
-###
+# Install updated git and lftp
+RUN apt-get purge git; \
+    add-apt-repository ppa:git-core/ppa; \
+    apt-get update; \
+    apt-get install -y git lftp;
 
+# Add php repo
 RUN add-apt-repository ppa:ondrej/php;
 
 # Install php and php extensions
 RUN apt-get update; \
     apt-get install -y \
-    php7.3 \
-    php7.3-bcmath \
-    php7.3-bz2 \
-    php7.3-intl \
-    php7.3-gd \
-    php7.3-mbstring \
-    php7.3-mysql \
-    php7.3-zip \
-    php7.3-fpm \
-    php7.3-dom \
-    php7.3-curl;
+    php${PHP_VERSION} \
+    php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-bz2 \
+    php${PHP_VERSION}-intl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-mysql \
+    php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-curl;
 
 # Allow composer to execute scripts as super user to remove warnings
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Add composer from composer official image
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Register the COMPOSER_HOME environment variable
+ENV COMPOSER_HOME /composer
+
+# Get the composer installer
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php
+
+# Install composer globally
+RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Install prestissimo to speed up installations
 RUN composer global require hirak/prestissimo
@@ -51,36 +64,24 @@ RUN composer global require hirak/prestissimo
 # Install laravel cli
 RUN composer global require laravel/installer
 
-###
-# End PHP Config
-###
-
-###
-# Start Node and Yarn config
-###
-
 # Install node
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -; \
     apt-get install -y nodejs 
 
+# Install yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -; \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
     apt-get update; \
     apt-get install yarn
 
-###
-# End Node and Yarn config
-###
-
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
 
 # Install Docker CLI
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
 # Install Docker-Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
 RUN useradd -ms /bin/bash runner; \
@@ -89,7 +90,6 @@ RUN useradd -ms /bin/bash runner; \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 WORKDIR /home/runner
-
 RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
     tar -zxf actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
     rm -f actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
@@ -97,11 +97,7 @@ RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_
     chown -R runner: /home/runner
 
 COPY entrypoint.sh /entrypoint.sh
-
 RUN chmod +x /entrypoint.sh
-
 ENTRYPOINT ["/entrypoint.sh"]
-
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
 USER runner
