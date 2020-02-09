@@ -18,8 +18,8 @@ ENV RUNNER_REPOSITORY_URL=""
 ENV DEBIAN_FRONTEND=noninteractive
 
 # update system
-RUN apt-get update -qy && apt-get upgrade -y; \
-    apt-get install -y apt-utils;
+RUN apt-get update -qy && apt-get install -y apt-utils; \
+    apt-get upgrade -y;
 
 # Install common dependencies
 RUN apt-get install -y software-properties-common apt-transport-https ca-certificates unzip curl sudo supervisor lsb-release;
