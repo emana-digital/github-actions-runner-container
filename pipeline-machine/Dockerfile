@@ -22,7 +22,7 @@ RUN apt-get update -qy && apt-get upgrade -y; \
     apt-get install -y apt-utils;
 
 # Install common dependencies
-RUN apt-get install software-properties-common apt-transport-https ca-certificates unzip curl sudo supervisor lsb-release;
+RUN apt-get install -y software-properties-common apt-transport-https ca-certificates unzip curl sudo supervisor lsb-release;
 
 # Install updated git and lftp
 RUN apt-get purge git; \
@@ -72,7 +72,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -; \
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -; \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
     apt-get update; \
-    apt-get install yarn
+    apt-get install yarn -y
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
