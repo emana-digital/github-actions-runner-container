@@ -1,18 +1,19 @@
 # Ubuntu LTS
 FROM ubuntu:18.04
+LABEL maintainer="alfredo@emana.digital"
 
 # Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.165.2"
+ARG GH_RUNNER_VERSION="2.168.0"
 ARG DOCKER_COMPOSE_VERSION="1.25.4"
 
-# Php Version
+# PHP Version
 ARG PHP_VERSION="7.3"
 
 # Env variables
 ENV RUNNER_NAME=""
-ENV RUNNER_WORK_DIRECTORY="_work"
-ENV RUNNER_TOKEN=""
 ENV RUNNER_REPOSITORY_URL=""
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Disable scripts interactions
 ENV DEBIAN_FRONTEND=noninteractive
@@ -74,9 +75,6 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -; \
     apt-get update; \
     apt-get install yarn -y
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
-
 # Install Docker CLI
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
@@ -90,15 +88,14 @@ RUN useradd -ms /bin/bash runner; \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 WORKDIR /home/runner
-RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    tar -zxf actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    rm -f actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    ./bin/installdependencies.sh; \
-    chown -R runner: /home/runner
 
-COPY entrypoint.sh /entrypoint.sh
+COPY install_actions.sh /home/runner
+RUN chmod +x /home/runner/install_actions.sh \
+    && /home/runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
+    && rm /home/runner/install_actions.sh
+
+COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 USER runner
 RUN sudo chown -R runner:runner /composer

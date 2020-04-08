@@ -1,53 +1,29 @@
 #!/bin/bash
 
-# Ensure Docker socket is owned by docker group
-if [[ -e "/var/run/docker.sock" ]]; then
-    sudo chgrp docker /var/run/docker.sock
+export RUNNER_ALLOW_RUNASROOT=1
+export PATH=$PATH:/home/runner
+
+_RUNNER_NAME=${RUNNER_NAME:-default}
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
+
+if [[ -n "${ACCESS_TOKEN}" ]]; then
+    URI=https://api.github.com
+    API_VERSION=v3
+    API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+    AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
+
+    _PROTO="$(echo "${REPO_URL}" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+    _URL="$(echo "${REPO_URL/${_PROTO}/}")"
+    _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
+    _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
+    _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
+
+    RUNNER_TOKEN="$(curl -XPOST -fsSL \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token" |
+        jq -r '.token')"
 fi
 
-if [[ "$@" == "bash" ]]; then
-    exec $@
-fi
-
-if [[ -z $RUNNER_NAME ]]; then
-    echo "RUNNER_NAME environment variable is not set, using '${HOSTNAME}'."
-    export RUNNER_NAME=${HOSTNAME}
-fi
-
-if [[ -z $RUNNER_WORK_DIRECTORY ]]; then
-    echo "RUNNER_WORK_DIRECTORY environment variable is not set, using '_work'."
-    export RUNNER_WORK_DIRECTORY="_work"
-fi
-
-if [[ -z $RUNNER_TOKEN ]]; then
-    echo "Error : You need to set the RUNNER_TOKEN environment variable."
-    exit 1
-fi
-
-if [[ -z $RUNNER_REPOSITORY_URL ]]; then
-    echo "Error : You need to set the RUNNER_REPOSITORY_URL environment variable."
-    exit 1
-fi
-
-if [[ -z $RUNNER_REPLACE_EXISTING ]]; then
-    export RUNNER_REPLACE_EXISTING="true"
-fi
-
-CONFIG_OPTS=""
-if [ "$(echo $RUNNER_REPLACE_EXISTING | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-	CONFIG_OPTS="--replace"
-fi
-
-if [[ -f ".runner" ]]; then
-    echo "Runner already configured. Skipping config."
-else
-    ./config.sh \
-        --url $RUNNER_REPOSITORY_URL \
-        --token $RUNNER_TOKEN \
-        --name $RUNNER_NAME \
-        --work $RUNNER_WORK_DIRECTORY \
-        $CONFIG_OPTS \
-        --unattended
-fi
-
-exec "$@"
+./config.sh --url "${REPO_URL}" --token "${RUNNER_TOKEN}" --name "${_RUNNER_NAME}" --work "${_RUNNER_WORKDIR}"
+./run.sh
