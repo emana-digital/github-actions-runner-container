@@ -11,12 +11,8 @@ ARG PHP_VERSION="7.3"
 
 # Env variables
 ENV RUNNER_NAME=""
-ENV RUNNER_REPOSITORY_URL=""
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# Disable scripts interactions
-ENV DEBIAN_FRONTEND=noninteractive
 
 # update system
 RUN apt-get update -qy && apt-get install -y apt-utils; \
@@ -82,20 +78,13 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
-RUN useradd -ms /bin/bash runner; \
-    usermod -aG docker runner; \
-    usermod -aG sudo runner; \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+WORKDIR /actions-runner
+COPY install_actions.sh /actions-runner
 
-WORKDIR /home/runner
-
-COPY install_actions.sh /home/runner
-RUN chmod +x /home/runner/install_actions.sh \
-    && /home/runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
-    && rm /home/runner/install_actions.sh
+RUN chmod +x /actions-runner/install_actions.sh \
+  && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} \
+  && rm /actions-runner/install_actions.sh
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-USER runner
-RUN sudo chown -R runner:runner /composer
