@@ -13,6 +13,8 @@ ENV RUNNER_NAME=""
 ENV RUNNER_WORK_DIRECTORY="_work"
 ENV RUNNER_TOKEN=""
 ENV RUNNER_REPOSITORY_URL=""
+ENV RUNNER_ALLOW_RUNASROOT=true
+ENV GITHUB_ACCESS_TOKEN=""
 
 # Disable scripts interactions
 ENV DEBIAN_FRONTEND=noninteractive
@@ -84,17 +86,22 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
 RUN useradd -ms /bin/bash runner; \
     usermod -aG docker runner; \
     usermod -aG sudo runner; \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+RUN mkdir -p /home/runner
 WORKDIR /home/runner
-RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    tar -zxf actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    rm -f actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz; \
-    ./bin/installdependencies.sh; \
-    chown -R runner: /home/runner
+RUN GH_RUNNER_VERSION=${GH_RUNNER_VERSION:-$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')} \
+    && curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz \
+    && tar -zxf actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz \
+    && rm -f actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz \
+    && ./bin/installdependencies.sh \
+    && chown -R root: /home/runner
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
