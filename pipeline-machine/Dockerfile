@@ -24,7 +24,24 @@ RUN apt-get update -qy && apt-get install -y apt-utils; \
     apt-get upgrade -y;
 
 # Install common dependencies
-RUN apt-get install -y software-properties-common apt-transport-https ca-certificates unzip curl sudo supervisor lsb-release;
+RUN apt-get install -y curl \
+    tar \
+    apt-transport-https \
+    ca-certificates \
+    sudo \
+    unzip \
+    lsb-release \
+    supervisor \
+    gnupg-agent \
+    software-properties-common \
+    build-essential \
+    zlib1g-dev \
+    gettext \
+    liblttng-ust0 \
+    libcurl4-openssl-dev \
+    inetutils-ping \
+    jq;
+
 
 # Install updated git and lftp
 RUN apt-get purge git; \
