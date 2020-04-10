@@ -106,11 +106,6 @@ RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOS
 RUN rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
-RUN useradd -ms /bin/bash runner; \
-    usermod -aG docker runner; \
-    usermod -aG sudo runner; \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
 RUN mkdir -p /home/runner
 WORKDIR /home/runner
 RUN GH_RUNNER_VERSION=${GH_RUNNER_VERSION:-$(curl --silent "https://api.github.com/repos/actions/runner/releases/latest" | grep tag_name | sed -E 's/.*"v([^"]+)".*/\1/')} \
@@ -124,5 +119,3 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-USER runner
-RUN sudo chown -R runner:runner /composer
