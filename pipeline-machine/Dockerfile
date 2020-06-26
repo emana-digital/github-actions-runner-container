@@ -1,12 +1,12 @@
 # Ubuntu LTS
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.168.0"
-ARG DOCKER_COMPOSE_VERSION="1.25.4"
+ARG GH_RUNNER_VERSION="2.263.0"
+ARG DOCKER_COMPOSE_VERSION="1.26.4"
 
-# Php Version
-ARG PHP_VERSION="7.3"
+# PHP Version
+ARG PHP_VERSION="7.4"
 
 # Env variables
 ENV RUNNER_NAME=""
@@ -63,6 +63,7 @@ RUN apt-get update; \
     php${PHP_VERSION}-mbstring \
     php${PHP_VERSION}-mysql \
     php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-dom \
     php${PHP_VERSION}-curl;
 
 # Allow composer to execute scripts as super user to remove warnings
@@ -84,7 +85,7 @@ RUN composer global require hirak/prestissimo
 RUN composer global require laravel/installer
 
 # Install node
-RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -; \
+RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -; \
     apt-get install -y nodejs 
 
 # Install yarn
