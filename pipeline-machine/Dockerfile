@@ -1,5 +1,5 @@
 # Ubuntu LTS
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 
 # Github Actions Runner and Docker Composer Version
 ARG GH_RUNNER_VERSION="2.263.0"
