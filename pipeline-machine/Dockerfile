@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 # Github Actions Runner and Docker Composer Version
 ARG GH_RUNNER_VERSION="2.263.0"
-ARG DOCKER_COMPOSE_VERSION="1.26.4"
+ARG DOCKER_COMPOSE_VERSION="1.26.0"
 
 # PHP Version
 ARG PHP_VERSION="7.4"
