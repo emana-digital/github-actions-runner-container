@@ -1,22 +1,22 @@
 # Runner Container - Github Actions
 
-Image to run multiple runners on docker
-
+Imagem para executar runners do github actions em cointaineres
 
 ```yml
 version: "3.7"
 
 services:
-    website-one:
-      image: emanadigital/github-actions-runner-container
-      environment:
-        RUNNER_NAME: "website-one-runner"
-        RUNNER_REPOSITORY_URL: XXXX
-        RUNNER_TOKEN: XXXX
-    website-two:
-      image: emanadigital/github-actions-runner-container
-      environment:
-        RUNNER_NAME: "website-two-runner"
-        RUNNER_REPOSITORY_URL: XXXX
-        RUNNER_TOKEN: XXXX
+  project-one:
+    image: emanadigital/github-actions-runner-container
+    environment:
+      RUNNER_NAME: "project-one-runner"
+      RUNNER_REPOSITORY_URL: XXXX
+      GITHUB_ACCESS_TOKEN: XXXX
+  organization-one:
+    image: emanadigital/github-actions-runner-container
+    environment:
+      IS_ORG_RUNNER: true
+      RUNNER_NAME: "organization-two-runner"
+      RUNNER_ORG_NAME: organization
+      GITHUB_ACCESS_TOKEN: XXXX
 ```

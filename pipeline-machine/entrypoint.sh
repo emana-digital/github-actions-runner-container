@@ -5,22 +5,17 @@ if [[ "$@" == "bash" ]]; then
 fi
 
 if [[ -z $RUNNER_NAME ]]; then
-    echo "RUNNER_NAME environment variable is not set, using '${HOSTNAME}'."
+    echo "Variável de ambiente RUNNER_NAME não setada, usando '${HOSTNAME}'."
     export RUNNER_NAME=${HOSTNAME}
 fi
 
 if [[ -z $RUNNER_WORK_DIRECTORY ]]; then
-    echo "RUNNER_WORK_DIRECTORY environment variable is not set, using '_work'."
+    echo "Variável de ambiente RUNNER_WORK_DIRECTORY não setada, usando '_work'."
     export RUNNER_WORK_DIRECTORY="_work"
 fi
 
-if [[ -z $RUNNER_TOKEN && -z $GITHUB_ACCESS_TOKEN ]]; then
-    echo "Error : You need to set RUNNER_TOKEN (or GITHUB_ACCESS_TOKEN) environment variable."
-    exit 1
-fi
-
-if [[ -z $RUNNER_REPOSITORY_URL ]]; then
-    echo "Error : You need to set the RUNNER_REPOSITORY_URL environment variable."
+if [[ -z $GITHUB_ACCESS_TOKEN ]]; then
+    echo "Erro: Você precisa setar a variável de ambiente GITHUB_ACCESS_TOKEN."
     exit 1
 fi
 
@@ -36,23 +31,46 @@ fi
 if [[ -f ".runner" ]]; then
     echo "Runner already configured. Skipping config."
 else
-    if [[ -n $GITHUB_ACCESS_TOKEN ]]; then
-        echo "Exchanging the GitHub Access Token with a Runner Token..."
-        _PROTO="$(echo "${RUNNER_REPOSITORY_URL}" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
-        _URL="$(echo "${RUNNER_REPOSITORY_URL/${_PROTO}/}")"
-        _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
-        _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
-        _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
 
-        RUNNER_TOKEN="$(curl -XPOST -fsSL \
-            -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token" |
-            jq -r '.token')"
+    echo "Exchanging the GitHub Access Token with a Runner Token..."
+
+    IS_ORG_RUNNER=${IS_ORG_RUNNER:-false}
+
+    URI=https://api.github.com
+    API_VERSION=v3
+    API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+    AUTH_HEADER="Authorization: token ${GITHUB_ACCESS_TOKEN}"
+
+    RUNNER_REPOSITORY_URL=${RUNNER_REPOSITORY_URL:-${URI}}
+    _PROTO="$(echo "${RUNNER_REPOSITORY_URL}" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+    _URL="$(echo "${RUNNER_REPOSITORY_URL/${_PROTO}/}")"
+    _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
+    _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
+    _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
+
+    _FULL_URL="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
+
+    if [[ ${IS_ORG_RUNNER} == "true" ]]; then
+        [[ -z ${RUNNER_ORG_NAME} ]] && (
+            echo "RUNNER_ORG_NAME required for org runners"
+            exit 1
+        )
+        _FULL_URL="${URI}/orgs/${RUNNER_ORG_NAME}/actions/runners/registration-token"
+        _SHORT_URL="${_PROTO}github.com/${RUNNER_ORG_NAME}"
+    else
+        _SHORT_URL=$RUNNER_REPOSITORY_URL
     fi
 
+    RUNNER_TOKEN="$(curl -XPOST -fsSL \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${_FULL_URL}" |
+        jq -r '.token')"
+
+    echo "Configuring"
+
     ./config.sh \
-        --url $RUNNER_REPOSITORY_URL \
+        --url $_SHORT_URL \
         --token $RUNNER_TOKEN \
         --name $RUNNER_NAME \
         --work $RUNNER_WORK_DIRECTORY \
