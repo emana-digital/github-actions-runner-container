@@ -1,9 +1,9 @@
 # Ubuntu LTS
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.263.0"
-ARG DOCKER_COMPOSE_VERSION="1.26.0"
+ARG GH_RUNNER_VERSION="2.278.0"
+ARG DOCKER_COMPOSE_VERSION="1.29.0"
 
 # PHP Version
 ARG PHP_VERSION="7.4"
@@ -78,26 +78,18 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /composer
 
 # Get the composer installer
-RUN curl -sS https://getcomposer.org/installer -o composer-setup.php
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 
 # Install composer globally
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-# Install prestissimo to speed up installations
-RUN composer global require hirak/prestissimo
-
-# Install laravel cli
-RUN composer global require laravel/installer
-
 # Install node
-RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -; \
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; \
     apt-get install -y nodejs 
 
-# Install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -; \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
-    apt-get update; \
-    apt-get install yarn -y
+# Update npm, install yarn
+RUN npm install -g npm;
+RUN npm install -g yarn;
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
