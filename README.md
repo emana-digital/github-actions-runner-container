@@ -1,6 +1,6 @@
 # Runner Container - Github Actions
 
-Imagem para executar runners do github actions em cointaineres
+Imagem para executar runners do Github Actions em contêineres
 
 ```yml
 version: "3.7"
