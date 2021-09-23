@@ -2,8 +2,8 @@
 FROM ubuntu:20.04
 
 # Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.278.0"
-ARG DOCKER_COMPOSE_VERSION="1.29.0"
+ARG GH_RUNNER_VERSION="2.283.1"
+ARG DOCKER_COMPOSE_VERSION="1.29.2"
 
 # PHP Version
 ARG PHP_VERSION="7.4"
@@ -32,6 +32,7 @@ RUN apt-get update -qy && apt-get install -y apt-utils; \
 RUN apt-get install -y curl \
     tar \
     apt-transport-https \
+    sshpass \   
     ca-certificates \
     sudo \
     unzip \
