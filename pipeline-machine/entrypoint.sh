@@ -19,15 +19,6 @@ if [[ -z $GITHUB_ACCESS_TOKEN ]]; then
     exit 1
 fi
 
-if [[ -z $RUNNER_REPLACE_EXISTING ]]; then
-    export RUNNER_REPLACE_EXISTING="true"
-fi
-
-CONFIG_OPTS=""
-if [ "$(echo $RUNNER_REPLACE_EXISTING | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    CONFIG_OPTS="--replace"
-fi
-
 if [[ -f ".runner" ]]; then
     echo "Runner already configured. Skipping config."
 else
@@ -74,7 +65,8 @@ else
         --token $RUNNER_TOKEN \
         --name $RUNNER_NAME \
         --work $RUNNER_WORK_DIRECTORY \
-        $CONFIG_OPTS \
+        --replace \
+        --labels $RUNNER_LABELS \
         --unattended
 fi
 
