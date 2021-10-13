@@ -15,7 +15,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, devstation]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2

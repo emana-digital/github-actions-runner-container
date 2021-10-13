@@ -5,9 +5,6 @@ FROM ubuntu:20.04
 ARG GH_RUNNER_VERSION="2.283.1"
 ARG DOCKER_COMPOSE_VERSION="1.29.2"
 
-# PHP Version
-ARG PHP_VERSION="7.4"
-
 # Env variables
 ENV RUNNER_NAME=""
 ENV RUNNER_LABELS=""
@@ -58,19 +55,45 @@ RUN apt-get purge git; \
 # Add php repo
 RUN add-apt-repository ppa:ondrej/php;
 
-# Install php and php extensions
+# Install php 7.4 and extensions
 RUN apt-get update; \
     apt-get install -y \
-    php${PHP_VERSION} \
-    php${PHP_VERSION}-bcmath \
-    php${PHP_VERSION}-bz2 \
-    php${PHP_VERSION}-intl \
-    php${PHP_VERSION}-gd \
-    php${PHP_VERSION}-mbstring \
-    php${PHP_VERSION}-mysql \
-    php${PHP_VERSION}-zip \
-    php${PHP_VERSION}-dom \
-    php${PHP_VERSION}-curl;
+    php7.4 \
+    php7.4-bcmath \
+    php7.4-bz2 \
+    php7.4-intl \
+    php7.4-gd \
+    php7.4-mbstring \
+    php7.4-mysql \
+    php7.4-zip \
+    php7.4-dom \
+    php7.4-curl;
+
+# Install php 7.3 and extensions
+RUN apt-get install -y \
+    php7.3 \
+    php7.3-bcmath \
+    php7.3-bz2 \
+    php7.3-intl \
+    php7.3-gd \
+    php7.3-mbstring \
+    php7.3-mysql \
+    php7.3-zip \
+    php7.3-dom \
+    php7.3-curl;
+
+# Install php 5.6 and extensions
+RUN apt-get install -y \
+    php5.6 \
+    php5.6-bcmath \
+    php5.6-bz2 \
+    php5.6-intl \
+    php5.6-gd \
+    php5.6-mbstring \
+    php5.6-mysql \
+    php5.6-zip \
+    php5.6-dom \
+    php5.6-curl;
 
 # Allow composer to execute scripts as super user to remove warnings
 ENV COMPOSER_ALLOW_SUPERUSER 1
