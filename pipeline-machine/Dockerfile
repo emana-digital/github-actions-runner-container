@@ -55,19 +55,18 @@ RUN apt-get purge git; \
 # Add php repo
 RUN add-apt-repository ppa:ondrej/php;
 
-# Install php 7.4 and extensions
-RUN apt-get update; \
-    apt-get install -y \
-    php7.4 \
-    php7.4-bcmath \
-    php7.4-bz2 \
-    php7.4-intl \
-    php7.4-gd \
-    php7.4-mbstring \
-    php7.4-mysql \
-    php7.4-zip \
-    php7.4-dom \
-    php7.4-curl;
+# Install php 5.6 and extensions
+RUN apt-get install -y \
+    php5.6 \
+    php5.6-bcmath \
+    php5.6-bz2 \
+    php5.6-intl \
+    php5.6-gd \
+    php5.6-mbstring \
+    php5.6-mysql \
+    php5.6-zip \
+    php5.6-dom \
+    php5.6-curl;
 
 # Install php 7.3 and extensions
 RUN apt-get install -y \
@@ -82,18 +81,33 @@ RUN apt-get install -y \
     php7.3-dom \
     php7.3-curl;
 
-# Install php 5.6 and extensions
-RUN apt-get install -y \
-    php5.6 \
-    php5.6-bcmath \
-    php5.6-bz2 \
-    php5.6-intl \
-    php5.6-gd \
-    php5.6-mbstring \
-    php5.6-mysql \
-    php5.6-zip \
-    php5.6-dom \
-    php5.6-curl;
+# Install php 7.4 and extensions
+RUN apt-get update; \
+    apt-get install -y \
+    php7.4 \
+    php7.4-bcmath \
+    php7.4-bz2 \
+    php7.4-intl \
+    php7.4-gd \
+    php7.4-mbstring \
+    php7.4-mysql \
+    php7.4-zip \
+    php7.4-dom \
+    php7.4-curl;
+
+# Install php 8.1 and extensions
+RUN apt-get update; \
+    apt-get install -y \
+    php8.1 \
+    php8.1-bcmath \
+    php8.1-bz2 \
+    php8.1-intl \
+    php8.1-gd \
+    php8.1-mbstring \
+    php8.1-mysql \
+    php8.1-zip \
+    php8.1-dom \
+    php8.1-curl;
 
 # Allow composer to execute scripts as super user to remove warnings
 ENV COMPOSER_ALLOW_SUPERUSER 1
@@ -108,7 +122,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Install node
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; \
+RUN curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -; \
     apt-get install -y nodejs 
 
 # Update npm, install yarn
