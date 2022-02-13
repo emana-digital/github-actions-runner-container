@@ -18,6 +18,7 @@ services:
       GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./_github_runner_work:/home/runner/_work
 
   organization-one:
     image: ghcr.io/emana-digital/github-actions-runner
@@ -30,4 +31,5 @@ services:
       GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./_github_runner_work:/home/runner/_work
 ```
