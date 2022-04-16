@@ -2,7 +2,7 @@
 FROM ubuntu:20.04
 
 # Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.283.1"
+ARG GH_RUNNER_VERSION="2.290.1"
 ARG DOCKER_COMPOSE_VERSION="1.29.2"
 
 # Env variables
