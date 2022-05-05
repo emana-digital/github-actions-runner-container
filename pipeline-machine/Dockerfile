@@ -122,8 +122,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Install node
-RUN curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -; \
-    apt-get install -y nodejs 
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -; \
+    apt-get install -y nodejs build-essential;
 
 # Update npm, install yarn
 RUN npm install -g npm;
