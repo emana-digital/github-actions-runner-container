@@ -1,9 +1,8 @@
 # Ubuntu LTS
 FROM ubuntu:20.04
 
-# Github Actions Runner and Docker Composer Version
-ARG GH_RUNNER_VERSION="2.290.1"
-ARG DOCKER_COMPOSE_VERSION="1.29.2"
+# Github Actions Runner
+ARG GH_RUNNER_VERSION="2.298.2"
 
 # Env variables
 ENV RUNNER_NAME=""
@@ -44,7 +43,6 @@ RUN apt-get install -y curl \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq;
-
 
 # Install updated git and lftp
 RUN apt-get purge git; \
@@ -134,10 +132,6 @@ RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
 
 # Install Docker CLI
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-
-# Install Docker-Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
 
 RUN rm -rf /var/lib/apt/lists/* && \
     apt-get clean
