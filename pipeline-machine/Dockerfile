@@ -1,8 +1,8 @@
 # Ubuntu LTS
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Github Actions Runner
-ARG GH_RUNNER_VERSION="2.298.2"
+ARG GH_RUNNER_VERSION="2.311.0"
 
 # Env variables
 ENV RUNNER_NAME=""
