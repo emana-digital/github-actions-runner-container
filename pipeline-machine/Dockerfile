@@ -39,7 +39,6 @@ RUN apt-get install -y curl \
     build-essential \
     zlib1g-dev \
     gettext \
-    liblttng-ust0 \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq;
