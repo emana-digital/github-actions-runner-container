@@ -125,11 +125,9 @@ RUN mkdir -p /etc/apt/keyrings; \
     NODE_MAJOR=20 \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list; \
     apt-get update; \
-    apt-get install nodejs -y;
-
-# Update npm, install yarn
-RUN npm install -g npm;
-RUN npm install -g yarn;
+    apt-get install nodejs -y; \
+    npm install -g npm; \
+    corepack enable;
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
